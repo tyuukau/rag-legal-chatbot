@@ -1,0 +1,33 @@
+services:
+  app:
+    container_name: app
+    build: .
+    ports:
+      - 7860:7860
+    volumes:
+      - .:/code
+    networks:
+      - local_network
+
+  chromadb:
+    container_name: chromadb
+    image: chromadb/chroma:latest
+    ports:
+      - 8000:8000
+    volumes:
+      - ./data/chroma:/chroma/chroma
+    networks:
+      - local_network
+  ollama:
+    container_name: ollama
+    image: ollama/ollama:latest
+    ports:
+      - 11434:11434
+    volumes:
+      - ./data/ollama:/root/.ollama
+    networks:
+      - local_network
+      
+networks:
+  local_network:
+    driver: bridge

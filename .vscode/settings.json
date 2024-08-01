@@ -1,0 +1,6 @@
+{
+  "flake8.args": ["--ignore=E501,E203"],
+  "files.exclude": {
+    "**/.venv/**/*": true
+  }
+}
