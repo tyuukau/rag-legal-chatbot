@@ -24,7 +24,7 @@ from .prompts import QueryGenPrompt, SingleSelectPrompt
 from ..settings import RAGSettings
 
 
-class _TwoStageRetriever(QueryFusionRetriever):
+class TwoStageRetriever(QueryFusionRetriever):
     """
     A retriever that performs two-stage retrieval using a fusion of multiple retrievers.
 
@@ -195,7 +195,7 @@ class LocalRetrieverFactory:
             gen_query (bool): Whether to generate a query or not.
 
         Returns:
-            QueryFusionRetriever or _TwoStageRetriever: The hybrid retriever.
+            QueryFusionRetriever or TwoStageRetriever: The hybrid retriever.
         """
         # VECTOR INDEX RETRIEVER
         vector_retriever = VectorIndexRetriever(
@@ -224,7 +224,7 @@ class LocalRetrieverFactory:
                 verbose=True,
             )
         else:
-            hybrid_retriever = _TwoStageRetriever(
+            hybrid_retriever = TwoStageRetriever(
                 retrievers=[bm25_retriever, vector_retriever],
                 retriever_weights=self._setting.retriever.retriever_weights,
                 llm=llm,

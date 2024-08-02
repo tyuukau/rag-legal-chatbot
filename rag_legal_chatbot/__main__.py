@@ -32,7 +32,6 @@ if args.host != "host.docker.internal":
         run_ollama_server()
 
 # LOGGER
-
 llama_index.core.set_global_handler("simple")
 logger = Logger(LOG_FILE)
 logger.reset_logs()

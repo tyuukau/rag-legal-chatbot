@@ -21,12 +21,12 @@ class LocalDataIngestion:
 
     def _filter_text(self, text):
         # Define the regex pattern.
-        pattern = r'[a-zA-Z0-9 \u00C0-\u01B0\u1EA0-\u1EF9`~!@#$%^&*()_\-+=\[\]{}|\\;:\'",.<>/?]+'
+        pattern = pattern = (
+            r'[a-zA-Z0-9 \u00C0-\u01BF\u1EA0-\u1EFF`~!@#$%^&*()_\-+=\[\]\n{}|\\;:\'",.<>/?§]+'
+        )
         matches = re.findall(pattern, text)
         # Join all matched substrings into a single string
-        filtered_text = " ".join(matches)
-        # Normalize the text by removing extra whitespaces
-        normalized_text = re.sub(r"\s+", " ", filtered_text.strip())
+        normalized_text = " ".join(matches)
 
         return normalized_text
 

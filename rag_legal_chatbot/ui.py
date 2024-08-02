@@ -123,6 +123,10 @@ class LocalChatbotUI:
         ]
         self._variant = "panel"
         self._llm_response = _LLMResponse()
+        self._sources: list[str] = []
+
+    def _get_sources(self):
+        return self._sources
 
     def _get_respone(
         self,
@@ -134,9 +138,11 @@ class LocalChatbotUI:
         if self.pipeline.get_model_name() in [None, ""]:
             for m in self._llm_response.yield_set_model_string():
                 yield *m, ""
+            self._sources = []
         elif message["text"] in [None, ""]:
             for m in self._llm_response.yield_empty_message_string():
                 yield *m, ""
+            self._sources = []
         else:
             console = sys.stdout
             sys.stdout = self.logger
@@ -155,6 +161,10 @@ class LocalChatbotUI:
                     ]
                 )
             sys.stdout = console
+            self._sources = [
+                n.node.get_content(metadata_mode=MetadataMode.LLM).strip()
+                for n in response.source_nodes
+            ]
 
     async def _aget_respone(
         self,
@@ -165,10 +175,12 @@ class LocalChatbotUI:
     ):
         if self.pipeline.get_model_name() in [None, ""]:
             for m in self._llm_response.yield_set_model_string():
-                yield *m, ""
+                yield m
+            self._sources = []
         elif message["text"] in [None, ""]:
             for m in self._llm_response.yield_empty_message_string():
-                yield *m, ""
+                yield m
+            self._sources = []
         else:
             console = sys.stdout
             sys.stdout = self.logger
@@ -178,15 +190,12 @@ class LocalChatbotUI:
             for m in self._llm_response.yield_stream_response(
                 message["text"], chatbot, response
             ):
-                yield *m, "\n\n".join(
-                    [
-                        n.node.get_content(
-                            metadata_mode=MetadataMode.LLM
-                        ).strip()
-                        for n in response.source_nodes
-                    ]
-                )
+                yield m
             sys.stdout = console
+            self._sources = [
+                n.node.get_content(metadata_mode=MetadataMode.LLM).strip()
+                for n in response.source_nodes
+            ]
 
     def _get_confirm_pull_model(self, model: str):
         if (model in ["gpt-4o-mini", "gpt-4o"]) or (
@@ -451,12 +460,21 @@ class LocalChatbotUI:
                             reset_btn = gr.Button(value="Reset", min_width=20)
 
                     with gr.Column(scale=10, variant=self._variant):
-                        sources = gr.TextArea(
-                            label="Sources",
-                            max_lines=200,
-                            value="",
-                            interactive=False,
-                        )
+                        sources_ = gr.State(self._sources)
+
+                        @gr.render(inputs=sources_)
+                        def render_sources(sources):
+                            boxes = []
+                            a = 1
+                            for source in sources:
+                                box = gr.Textbox(
+                                    value=source,
+                                    key=a,
+                                    label=f"Box {a}",
+                                    max_lines=5,
+                                )
+                                boxes.append(box)
+                                a += 1
 
             with gr.Tab("Output"):
                 with gr.Row(variant=self._variant):
@@ -507,9 +525,11 @@ class LocalChatbotUI:
                 inputs=[documents, message],
                 outputs=[documents],
             ).then(
-                self._aget_respone,
+                self._get_respone,
                 inputs=[chat_mode, message, chatbot],
-                outputs=[message, chatbot, status, sources],
+                outputs=[message, chatbot, status],
+            ).then(
+                self._get_sources, inputs=None, outputs=[sources_]
             )
             language.change(self._change_language, inputs=[language])
             model.change(

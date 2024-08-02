@@ -27,7 +27,7 @@ class OllamaSettings(BaseModel):
     )
     temperature: float = Field(default=0.1, description="Temperature")
     chat_token_limit: int = Field(
-        default=4000, description="Chat memory limit"
+        default=10000, description="Chat memory limit"
     )
 
 
@@ -35,11 +35,11 @@ class RetrieverSettings(BaseModel):
     num_queries: int = Field(
         default=5, description="Number of generated queries"
     )
-    similarity_top_k: int = Field(default=20, description="Top k documents")
+    similarity_top_k: int = Field(default=10, description="Top k documents")
     retriever_weights: list[float] = Field(
         default=[0.4, 0.6], description="Weights for retriever"
     )
-    top_k_rerank: int = Field(default=6, description="Top k rerank")
+    top_k_rerank: int = Field(default=10, description="Top k rerank")
     rerank_llm: str = Field(
         default="BAAI/bge-reranker-large", description="Rerank LLM model"
     )
@@ -61,7 +61,7 @@ class IngestionSettings(BaseModel):
     cache_folder: str = Field(
         default="data/huggingface", description="Cache folder"
     )
-    chunk_size: int = Field(default=512, description="Document chunk size")
+    chunk_size: int = Field(default=256, description="Document chunk size")
     chunk_overlap: int = Field(
         default=32, description="Document chunk overlap"
     )
