@@ -25,7 +25,7 @@ done
 
 # Run the Python app
 if [[ -n $NGROK ]]; then
-    python -m rag_chatbot --host localhost & ngrok http 7860
+    python -m rag_legal_chatbot --host localhost & ngrok http 7860
 else
-    python -m rag_chatbot --host localhost
+    python -m rag_legal_chatbot --host localhost
 fi
