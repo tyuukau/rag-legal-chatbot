@@ -294,12 +294,10 @@ class LocalRetrieverFactory:
             VectorIndexRetriever or RouterRetriever: The retriever.
         """
         vector_index = VectorStoreIndex(nodes=nodes)
+
+        retriever = self._get_normal_retriever(vector_index, llm)
         if len(nodes) > self._setting.retriever.top_k_rerank:
             retriever = self._get_router_retriever(
-                vector_index, llm, language
-            )
-        else:
-            retriever = self._get_normal_retriever(
                 vector_index, llm, language
             )
 

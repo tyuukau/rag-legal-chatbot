@@ -104,3 +104,13 @@ class LocalRAGPipeline:
         else:
             self._query_engine.reset()
             return self._query_engine.stream_chat(message)
+
+    async def aquery(
+        self, mode: str, message: str, chatbot: list[list[str]]
+    ) -> StreamingAgentChatResponse:
+        if mode == "chat":
+            history = self.get_history(chatbot)
+            return await self._query_engine.astream_chat(message, history)
+        else:
+            self._query_engine.reset()
+            return await self._query_engine.astream_chat(message)

@@ -133,10 +133,10 @@ class LocalChatbotUI:
     ):
         if self.pipeline.get_model_name() in [None, ""]:
             for m in self._llm_response.yield_set_model_string():
-                yield m, ""
+                yield *m, ""
         elif message["text"] in [None, ""]:
             for m in self._llm_response.yield_empty_message_string():
-                yield m, ""
+                yield *m, ""
         else:
             console = sys.stdout
             sys.stdout = self.logger
@@ -146,7 +146,39 @@ class LocalChatbotUI:
             for m in self._llm_response.yield_stream_response(
                 message["text"], chatbot, response
             ):
-                yield m, "\n\n".join(
+                yield *m, "\n\n".join(
+                    [
+                        n.node.get_content(
+                            metadata_mode=MetadataMode.LLM
+                        ).strip()
+                        for n in response.source_nodes
+                    ]
+                )
+            sys.stdout = console
+
+    async def _aget_respone(
+        self,
+        chat_mode: str,
+        message: dict[str, str],
+        chatbot: list[list[str, str]],
+        progress: gr.Progress = gr.Progress(track_tqdm=True),
+    ):
+        if self.pipeline.get_model_name() in [None, ""]:
+            for m in self._llm_response.yield_set_model_string():
+                yield *m, ""
+        elif message["text"] in [None, ""]:
+            for m in self._llm_response.yield_empty_message_string():
+                yield *m, ""
+        else:
+            console = sys.stdout
+            sys.stdout = self.logger
+            response = await self.pipeline.aquery(
+                chat_mode, message["text"], chatbot
+            )
+            for m in self._llm_response.yield_stream_response(
+                message["text"], chatbot, response
+            ):
+                yield *m, "\n\n".join(
                     [
                         n.node.get_content(
                             metadata_mode=MetadataMode.LLM
@@ -307,6 +339,8 @@ class LocalChatbotUI:
             theme=gr.themes.Soft(primary_hue="slate"),
             js=_JS_LIGHT_THEME,
             css=_CSS,
+            fill_height=True,
+            fill_width=True,
         ) as demo:
             gr.Markdown("## Local RAG Chatbot 🤖")
 
@@ -473,7 +507,7 @@ class LocalChatbotUI:
                 inputs=[documents, message],
                 outputs=[documents],
             ).then(
-                self._get_respone,
+                self._aget_respone,
                 inputs=[chat_mode, message, chatbot],
                 outputs=[message, chatbot, status, sources],
             )
