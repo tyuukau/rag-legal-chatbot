@@ -1,0 +1,17 @@
+gradio
+python-dotenv
+sentence-transformers
+pydantic
+llama-index-embeddings-huggingface
+llama-index-llms-openai
+llama-index-llms-ollama
+llama-index-vector-stores-chroma
+chromadb
+llama-index-readers-file
+llama-index
+transformers
+torch
+llama-index-retrievers-bm25
+pytest
+pymupdf
+tqdm
