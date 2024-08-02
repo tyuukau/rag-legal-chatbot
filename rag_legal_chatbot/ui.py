@@ -372,7 +372,7 @@ class LocalChatbotUI:
                                 "llama3-chatqa:8b-v1.5-q8_0",
                                 "llama3-chatqa:8b-v1.5-q6_K",
                             ],
-                            value="gpt-4o-mini",
+                            value=None,
                             interactive=True,
                             allow_custom_value=True,
                         )
