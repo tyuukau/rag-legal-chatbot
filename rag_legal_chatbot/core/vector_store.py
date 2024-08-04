@@ -31,7 +31,7 @@ class LocalVectorStoreFactory:
 
     def get_vector_store_index(self) -> VectorStoreIndex:
         db = chromadb.PersistentClient(path=self._persist_dir)
-        collection = db.get_or_create_collection(self._collection_name)
+        collection = db.get_collection(self._collection_name)
         vector_store = ChromaVectorStore(chroma_collection=collection)
         storage_context = StorageContext.from_defaults(
             vector_store=vector_store

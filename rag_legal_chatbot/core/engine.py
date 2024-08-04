@@ -25,8 +25,8 @@ class LocalChatEngineFactory:
         host: str = "host.docker.internal",
     ):
         super().__init__()
-        self.setting = setting or RAGSettings()
-        self.retriever_factory = LocalRetrieverFactory(self.setting)
+        self._setting = setting or RAGSettings()
+        self.retriever_factory = LocalRetrieverFactory(self._setting)
         self.host = host
 
     def set_engine(
@@ -37,13 +37,13 @@ class LocalChatEngineFactory:
     ) -> CondensePlusContextChatEngine | SimpleChatEngine:
 
         # Normal chat engine
-        if len(nodes) == 0:
-            return SimpleChatEngine.from_defaults(
-                llm=llm,
-                memory=ChatMemoryBuffer(
-                    token_limit=self.setting.OLLAMA.CHAT_TOKEN_LIMIT
-                ),
-            )
+        # if len(nodes) == 0:
+        #     return SimpleChatEngine.from_defaults(
+        #         llm=llm,
+        #         memory=ChatMemoryBuffer(
+        #             token_limit=self.setting.OLLAMA.CHAT_TOKEN_LIMIT
+        #         ),
+        #     )
 
         # Chat engine with documents
         return CondensePlusContextChatEngine.from_defaults(
@@ -52,7 +52,7 @@ class LocalChatEngineFactory:
             ),
             llm=llm,
             memory=ChatMemoryBuffer(
-                token_limit=self.setting.OLLAMA.CHAT_TOKEN_LIMIT
+                token_limit=self._setting.OLLAMA.CHAT_TOKEN_LIMIT
             ),
             system_prompt=SystemPrompt()(language=language),
             context_prompt=ContextPrompt()(language=language),
