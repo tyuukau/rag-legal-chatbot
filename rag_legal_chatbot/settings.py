@@ -8,87 +8,83 @@ load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 
 class OllamaSettings(BaseModel):
-    llm: str = Field(default="gpt-4o-mini", description="LLM model")
-    api_key: Union[str, None] = Field(
+    LLM: str = Field(default="gpt-4o-mini", description="LLM model")
+    API_KEY: Union[str, None] = Field(
         default=os.getenv("API_KEY", None), description="API key"
     )
-    keep_alive: str = Field(
+    KEEP_ALIVE: str = Field(
         default="1h", description="Keep alive time for the server"
     )
-    tfs_z: float = Field(default=1.0, description="TFS normalization factor")
-    top_k: int = Field(default=40, description="Top k sampling")
-    top_p: float = Field(default=0.9, description="Top p sampling")
-    repeat_last_n: int = Field(default=64, description="Repeat last n tokens")
-    repeat_penalty: float = Field(default=1.1, description="Repeat penalty")
-    request_timeout: float = Field(default=300, description="Request timeout")
-    port: int = Field(default=11434, description="Port number")
-    context_window: int = Field(
+    TFS_Z: float = Field(default=1.0, description="TFS normalization factor")
+    TOP_K: int = Field(default=40, description="Top k sampling")
+    TOP_P: float = Field(default=0.9, description="Top p sampling")
+    REPEAT_LAST_N: int = Field(default=64, description="Repeat last n tokens")
+    REPEAT_PENALTY: float = Field(default=1.1, description="Repeat penalty")
+    REQUEST_TIMEOUT: float = Field(default=300, description="Request timeout")
+    PORT: int = Field(default=11434, description="Port number")
+    CONTEXT_WINDOW: int = Field(
         default=8000, description="Context window size"
     )
-    temperature: float = Field(default=0.1, description="Temperature")
-    chat_token_limit: int = Field(
+    TEMPERATURE: float = Field(default=0.1, description="Temperature")
+    CHAT_TOKEN_LIMIT: int = Field(
         default=10000, description="Chat memory limit"
     )
 
 
 class RetrieverSettings(BaseModel):
-    num_queries: int = Field(
+    NUM_QUERIES: int = Field(
         default=5, description="Number of generated queries"
     )
-    similarity_top_k: int = Field(default=10, description="Top k documents")
-    retriever_weights: list[float] = Field(
+    SIMILARITY_TOP_K: int = Field(default=10, description="Top k documents")
+    RETRIEVER_WEIGHTS: list[float] = Field(
         default=[0.4, 0.6], description="Weights for retriever"
     )
-    top_k_rerank: int = Field(default=10, description="Top k rerank")
-    rerank_llm: str = Field(
+    TOP_K_RERANK: int = Field(default=10, description="Top k rerank")
+    RERANK_LLM: str = Field(
         default="BAAI/bge-reranker-large", description="Rerank LLM model"
     )
-    fusion_mode: str = Field(
+    FUSION_MODE: str = Field(
         default="dist_based_score", description="Fusion mode"
     )
 
 
 class IngestionSettings(BaseModel):
-    embed_llm: str = Field(
+    EMBED_LLM: str = Field(
         default="text-embedding-3-small", description="Embedding LLM model"
     )
-    embed_api_key: Union[str, None] = Field(
+    EMBED_API_KEY: Union[str, None] = Field(
         default=os.getenv("API_KEY", None), description="API key"
     )
-    embed_batch_size: int = Field(
+    EMBED_BATCH_SIZE: int = Field(
         default=8, description="Embedding batch size"
     )
-    cache_folder: str = Field(
+    CACHE_FOLDER: str = Field(
         default="data/huggingface", description="Cache folder"
     )
-    chunk_size: int = Field(default=256, description="Document chunk size")
-    chunk_overlap: int = Field(
+    CHUNK_SIZE: int = Field(default=256, description="Document chunk size")
+    CHUCK_OVERLAP: int = Field(
         default=32, description="Document chunk overlap"
     )
-    chunking_regex: str = Field(
+    CHUNKING_REGEX: str = Field(
         default="[^,.;。？！]+[,.;。？！]?", description="Chunking regex"
     )
-    paragraph_sep: str = Field(
+    PARAGRAPH_SEP: str = Field(
         default="\n \n", description="Paragraph separator"
     )
-    num_workers: int = Field(default=0, description="Number of workers")
+    NUM_WORKERS: int = Field(default=0, description="Number of workers")
 
 
 class StorageSettings(BaseModel):
-    persist_dir_chroma: str = Field(
-        default="data/chroma", description="Chroma directory"
+    PERSIST_DIR: str = Field(
+        default="./chroma", description="Chroma directory"
     )
-    persist_dir_storage: str = Field(
-        default="data/storage", description="Storage directory"
-    )
-    collection_name: str = Field(
+    COLLECTION_NAME: str = Field(
         default="collection", description="Collection name"
     )
-    port: int = Field(default=8000, description="Port number")
 
 
 class RAGSettings(BaseModel):
-    ollama: OllamaSettings = OllamaSettings()
-    retriever: RetrieverSettings = RetrieverSettings()
-    ingestion: IngestionSettings = IngestionSettings()
-    storage: StorageSettings = StorageSettings()
+    OLLAMA: OllamaSettings = OllamaSettings()
+    RETRIEVER: RetrieverSettings = RetrieverSettings()
+    INGESTION: IngestionSettings = IngestionSettings()
+    STORAGE: StorageSettings = StorageSettings()

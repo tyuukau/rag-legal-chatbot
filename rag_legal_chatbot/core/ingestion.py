@@ -35,18 +35,17 @@ class LocalDataIngestion:
         input_files: list[str],
         embed_nodes: bool = True,
         embed_model: Any | None = None,
-    ) -> list[BaseNode]:
-        return_nodes = []
+    ) -> None:
         self._ingested_file = []
 
         if len(input_files) == 0:
-            return return_nodes
+            return
 
         splitter = SentenceSplitter.from_defaults(
-            chunk_size=self._setting.ingestion.chunk_size,
-            chunk_overlap=self._setting.ingestion.chunk_overlap,
-            paragraph_separator=self._setting.ingestion.paragraph_sep,
-            secondary_chunking_regex=self._setting.ingestion.chunking_regex,
+            chunk_size=self._setting.INGESTION.CHUNK_SIZE,
+            chunk_overlap=self._setting.INGESTION.CHUCK_OVERLAP,
+            paragraph_separator=self._setting.INGESTION.PARAGRAPH_SEP,
+            secondary_chunking_regex=self._setting.INGESTION.CHUNKING_REGEX,
         )
 
         if embed_nodes:
@@ -57,32 +56,29 @@ class LocalDataIngestion:
             self._ingested_file.append(file_name)
 
             if file_name in self._node_store:
-                return_nodes.extend(self._node_store[file_name])
-            else:
-                document = pymupdf.open(input_file)
-                all_text = ""
+                continue
 
-                for _, page in enumerate(document):
-                    page_text = page.get_text("text")
-                    page_text = self._filter_text(page_text)
-                    all_text += " " + page_text
+            document = pymupdf.open(input_file)
+            all_text = ""
 
-                document = Document(
-                    text=all_text.strip(),
-                    metadata={
-                        "file_name": file_name,
-                    },
-                )
+            for _, page in enumerate(document):
+                page_text = page.get_text("text")
+                page_text = self._filter_text(page_text)
+                all_text += " " + page_text
 
-                nodes = splitter([document], show_progress=True)
+            document = Document(
+                text=all_text.strip(),
+                metadata={
+                    "file_name": file_name,
+                },
+            )
 
-                if embed_nodes:
-                    nodes = Settings.embed_model(nodes, show_progress=True)
+            nodes = splitter([document], show_progress=True)
 
-                self._node_store[file_name] = nodes
+            if embed_nodes:
+                nodes = Settings.embed_model(nodes, show_progress=True)
 
-                return_nodes.extend(nodes)
-        return return_nodes
+            self._node_store[file_name] = nodes
 
     def reset(self):
         self._node_store = {}
@@ -91,13 +87,13 @@ class LocalDataIngestion:
     def check_nodes_exist(self):
         return len(self._node_store.values()) > 0
 
-    def get_ingested_nodes(self):
+    def get_ingested_nodes(self) -> list[BaseNode]:
         return_nodes = []
-        for file in self._ingested_file:
-            return_nodes.extend(self._node_store[file])
+        for file_name in self._ingested_file:
+            return_nodes.extend(self._node_store[file_name])
         return return_nodes
 
-    def _get_all_nodes(self):
+    def get_all_nodes(self) -> list[BaseNode]:
         return_nodes = []
         for nodes in self._node_store.values():
             return_nodes.extend(nodes)

@@ -6,8 +6,7 @@ from .core import (
     LocalChatEngineFactory,
     LocalDataIngestion,
     LocalRAGModelFactory,
-    LocalEmbedding,
-    LocalVectorStoreFactory,
+    LocalEmbeddingFactory,
 )
 
 from .core.prompts import SystemPrompt
@@ -19,14 +18,13 @@ class LocalRAGPipeline:
         self._language = "eng"
         self._model_name = ""
         self._engine = LocalChatEngineFactory(host=host)
-        self._default_model = LocalRAGModelFactory.set(
+        self._default_model = LocalRAGModelFactory.set_model(
             self._model_name, host=host
         )
         self._query_engine = None
         self._ingestion = LocalDataIngestion()
-        self._vector_store = LocalVectorStoreFactory(host=host)
-        Settings.llm = LocalRAGModelFactory.set(host=host)
-        Settings.embed_model = LocalEmbedding.set(host=host)
+        Settings.llm = LocalRAGModelFactory.set_model(host=host)
+        Settings.embed_model = LocalEmbeddingFactory.set_embedding(host=host)
 
     def get_model_name(self):
         return self._model_name
@@ -38,7 +36,7 @@ class LocalRAGPipeline:
         self._language = language
 
     def set_model(self):
-        Settings.llm = LocalRAGModelFactory.set(
+        Settings.llm = LocalRAGModelFactory.set_model(
             model_name=self._model_name,
             system_prompt=SystemPrompt()(language=self._language),
             host=self._host,
@@ -60,7 +58,9 @@ class LocalRAGPipeline:
         self.reset_engine()
 
     def set_embed_model(self, model_name: str):
-        Settings.embed_model = LocalEmbedding.set(model_name, self._host)
+        Settings.embed_model = LocalEmbeddingFactory.set_embedding(
+            model_name, self._host
+        )
 
     def pull_model(self, model_name: str):
         return LocalRAGModelFactory.pull(self._host, model_name)

@@ -19,6 +19,7 @@ from llama_index.core.retrievers import (
 )
 from llama_index.retrievers.bm25 import BM25Retriever
 
+from .vector_store import LocalVectorStoreFactory
 from .prompts import QueryGenPrompt, SingleSelectPrompt
 
 from ..settings import RAGSettings
@@ -81,8 +82,8 @@ class TwoStageRetriever(QueryFusionRetriever):
         )
         self._setting = setting or RAGSettings()
         self._rerank_model = SentenceTransformerRerank(
-            top_n=self._setting.retriever.top_k_rerank,
-            model=self._setting.retriever.rerank_llm,
+            top_n=self._setting.RETRIEVER.TOP_K_RERANK,
+            model=self._setting.RETRIEVER.RERANK_LLM,
         )
 
     def _retrieve(self, query_bundle: QueryBundle) -> list[NodeWithScore]:
@@ -154,12 +155,10 @@ class LocalRetrieverFactory:
         host: str = "host.docker.internal",
     ):
         super().__init__()
-        self._setting = setting or RAGSettings()
-        self._host = host
+        self.setting = setting or RAGSettings()
+        self.host = host
 
-    def _get_normal_retriever(
-        self, vector_index: VectorStoreIndex, llm: LLM | None = None
-    ):
+    def _get_normal_retriever(self, vector_index: VectorStoreIndex):
         """
         Returns a normal retriever.
 
@@ -170,10 +169,9 @@ class LocalRetrieverFactory:
         Returns:
             VectorIndexRetriever: The normal retriever.
         """
-        llm = llm or Settings.llm
         return VectorIndexRetriever(
             index=vector_index,
-            similarity_top_k=self._setting.retriever.similarity_top_k,
+            similarity_top_k=self.setting.RETRIEVER.SIMILARITY_TOP_K,
             embed_model=Settings.embed_model,
             verbose=True,
         )
@@ -200,14 +198,14 @@ class LocalRetrieverFactory:
         # VECTOR INDEX RETRIEVER
         vector_retriever = VectorIndexRetriever(
             index=vector_index,
-            similarity_top_k=self._setting.retriever.similarity_top_k,
+            similarity_top_k=self.setting.RETRIEVER.SIMILARITY_TOP_K,
             embed_model=Settings.embed_model,
             verbose=True,
         )
 
         bm25_retriever = BM25Retriever.from_defaults(
             index=vector_index,
-            similarity_top_k=self._setting.retriever.similarity_top_k,
+            similarity_top_k=self.setting.RETRIEVER.SIMILARITY_TOP_K,
             verbose=True,
         )
 
@@ -215,23 +213,23 @@ class LocalRetrieverFactory:
         if gen_query:
             hybrid_retriever = QueryFusionRetriever(
                 retrievers=[bm25_retriever, vector_retriever],
-                retriever_weights=self._setting.retriever.retriever_weights,
+                retriever_weights=self.setting.RETRIEVER.RETRIEVER_WEIGHTS,
                 llm=llm,
                 query_gen_prompt=QueryGenPrompt()(language),
-                similarity_top_k=self._setting.retriever.top_k_rerank,
-                num_queries=self._setting.retriever.num_queries,
-                mode=self._setting.retriever.fusion_mode,
+                similarity_top_k=self.setting.RETRIEVER.TOP_K_RERANK,
+                num_queries=self.setting.RETRIEVER.NUM_QUERIES,
+                mode=self.setting.RETRIEVER.FUSION_MODE,
                 verbose=True,
             )
         else:
             hybrid_retriever = TwoStageRetriever(
                 retrievers=[bm25_retriever, vector_retriever],
-                retriever_weights=self._setting.retriever.retriever_weights,
+                retriever_weights=self.setting.RETRIEVER.RETRIEVER_WEIGHTS,
                 llm=llm,
                 query_gen_prompt=None,
-                similarity_top_k=self._setting.retriever.similarity_top_k,
+                similarity_top_k=self.setting.RETRIEVER.SIMILARITY_TOP_K,
                 num_queries=1,
-                mode=self._setting.retriever.fusion_mode,
+                mode=self.setting.RETRIEVER.FUSION_MODE,
                 verbose=True,
             )
 
@@ -293,10 +291,12 @@ class LocalRetrieverFactory:
         Returns:
             VectorIndexRetriever or RouterRetriever: The retriever.
         """
-        vector_index = VectorStoreIndex(nodes=nodes)
+        vector_index: VectorStoreIndex = LocalVectorStoreFactory(
+            setting=self.setting
+        ).initialize_vector_store_index(nodes)
 
-        retriever = self._get_normal_retriever(vector_index, llm)
-        if len(nodes) > self._setting.retriever.top_k_rerank:
+        retriever = self._get_normal_retriever(vector_index)
+        if len(nodes) > self._setting.RETRIEVER.TOP_K_RERANK:
             retriever = self._get_router_retriever(
                 vector_index, llm, language
             )

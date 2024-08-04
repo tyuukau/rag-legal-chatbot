@@ -137,11 +137,11 @@ class LocalChatbotUI:
     ):
         if self.pipeline.get_model_name() in [None, ""]:
             for m in self._llm_response.yield_set_model_string():
-                yield *m, ""
+                yield m
             self._sources = []
         elif message["text"] in [None, ""]:
             for m in self._llm_response.yield_empty_message_string():
-                yield *m, ""
+                yield m
             self._sources = []
         else:
             console = sys.stdout
@@ -152,14 +152,7 @@ class LocalChatbotUI:
             for m in self._llm_response.yield_stream_response(
                 message["text"], chatbot, response
             ):
-                yield *m, "\n\n".join(
-                    [
-                        n.node.get_content(
-                            metadata_mode=MetadataMode.LLM
-                        ).strip()
-                        for n in response.source_nodes
-                    ]
-                )
+                yield m
             sys.stdout = console
             self._sources = [
                 n.node.get_content(metadata_mode=MetadataMode.LLM).strip()
@@ -470,7 +463,7 @@ class LocalChatbotUI:
                                 box = gr.Textbox(
                                     value=source,
                                     key=a,
-                                    label=f"Box {a}",
+                                    label=f"Source {a}",
                                     max_lines=5,
                                 )
                                 boxes.append(box)

@@ -26,7 +26,7 @@ class LocalChatEngineFactory:
     ):
         super().__init__()
         self.setting = setting or RAGSettings()
-        self.retriever = LocalRetrieverFactory(self.setting)
+        self.retriever_factory = LocalRetrieverFactory(self.setting)
         self.host = host
 
     def set_engine(
@@ -41,18 +41,18 @@ class LocalChatEngineFactory:
             return SimpleChatEngine.from_defaults(
                 llm=llm,
                 memory=ChatMemoryBuffer(
-                    token_limit=self.setting.ollama.chat_token_limit
+                    token_limit=self.setting.OLLAMA.CHAT_TOKEN_LIMIT
                 ),
             )
 
         # Chat engine with documents
         return CondensePlusContextChatEngine.from_defaults(
-            retriever=self.retriever.get_retrievers(
+            retriever=self.retriever_factory.get_retrievers(
                 llm=llm, nodes=nodes, language=language
             ),
             llm=llm,
             memory=ChatMemoryBuffer(
-                token_limit=self.setting.ollama.chat_token_limit
+                token_limit=self.setting.OLLAMA.CHAT_TOKEN_LIMIT
             ),
             system_prompt=SystemPrompt()(language=language),
             context_prompt=ContextPrompt()(language=language),

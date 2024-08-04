@@ -9,10 +9,10 @@ from llama_index.core.schema import MetadataMode, TextNode
 from llama_index.core.storage.docstore import DocumentStore
 from llama_index.core.evaluation import EmbeddingQAFinetuneDataset
 
-from rag_chatbot.core import LocalRAGModelFactory
-from rag_chatbot.core import LocalEmbedding
-from rag_chatbot.core import LocalDataIngestion
-from rag_chatbot.core import RAGSettings
+from rag_legal_chatbot.core import LocalRAGModelFactory
+from rag_legal_chatbot.core import LocalEmbeddingFactory
+from rag_legal_chatbot.core import LocalDataIngestion
+from rag_legal_chatbot.core import RAGSettings
 
 
 _DEFAULT_QA_GENERATE_PROMPT_TMPL = """\
@@ -83,11 +83,11 @@ class QAGenxerator:
         setting.ingestion.embed_llm = (
             embed_model or setting.ingestion.embed_llm
         )
-        self._embed_model = LocalEmbedding.set(setting)
-        self._llm = LocalRAGModelFactory.set(
+        self._embed_model = LocalEmbeddingFactory.set_embedding(setting)
+        self._llm = LocalRAGModelFactory.set_model(
             model_name=llm or setting.ollama.llm, host=host
         )
-        self._ingestion = LocalDataIngestion()
+        self.ingestion = LocalDataIngestion()
 
     def generate(
         self,
@@ -102,7 +102,8 @@ class QAGenxerator:
         if os.path.exists(os.path.join(output_dir, "docstore.json")):
             print("Docstore already exist! Skip ingestion.")
 
-        nodes = self._ingestion.store_nodes(input_files, embed_nodes=True)
+        self.ingestion.store_nodes(input_files, embed_nodes=True)
+        nodes = self.ingestion.get_all_nodes()
         random.shuffle(nodes)
         dataset = _generate_question_context_pairs(
             nodes=nodes[:max_nodes],

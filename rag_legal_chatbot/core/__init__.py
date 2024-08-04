@@ -1,13 +1,11 @@
-from .embedding import LocalEmbedding
+from .embedding import LocalEmbeddingFactory
 from .model import LocalRAGModelFactory
 from .ingestion import LocalDataIngestion
-from .vector_store import LocalVectorStoreFactory
 from .engine import LocalChatEngineFactory
 
 __all__ = [
-    "LocalEmbedding",
+    "LocalEmbeddingFactory",
     "LocalRAGModelFactory",
     "LocalDataIngestion",
-    "LocalVectorStoreFactory",
     "LocalChatEngineFactory",
 ]

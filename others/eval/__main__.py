@@ -17,10 +17,10 @@ from llama_index.core.evaluation import (
 from llama_index.core.evaluation import EmbeddingQAFinetuneDataset
 from llama_index.core.storage.docstore import DocumentStore
 
-from rag_chatbot.core import LocalChatEngineFactory, LocalRetriever
-from rag_chatbot.core import LocalRAGModelFactory
-from rag_chatbot.settings import RAGSettings
-from rag_chatbot.ollama import is_port_open, run_ollama_server
+from rag_legal_chatbot.core import LocalChatEngineFactory, LocalRetriever
+from rag_legal_chatbot.core import LocalRAGModelFactory
+from rag_legal_chatbot.settings import RAGSettings
+from rag_legal_chatbot.ollama import is_port_open, run_ollama_server
 
 load_dotenv()
 
@@ -39,8 +39,8 @@ class RAGPipelineEvaluator:
             print("Pulling LLM model")
             LocalRAGModelFactory.pull(host=host, model_name=llm)
             print("Pulling complete")
-        self._llm = LocalRAGModelFactory.set(model_name=llm, host=host)
-        self._teacher = LocalRAGModelFactory.set(
+        self._llm = LocalRAGModelFactory.set_model(model_name=llm, host=host)
+        self._teacher = LocalRAGModelFactory.set_model(
             model_name=teacher, host=host
         )
         self._engine = LocalChatEngineFactory(host=host)
@@ -51,8 +51,8 @@ class RAGPipelineEvaluator:
         nodes = list(docstore.docs.values())
         self._index = VectorStoreIndex(nodes=nodes)
         self._dataset = EmbeddingQAFinetuneDataset.from_json(dataset_path)
-        self._top_k = self._setting.retriever.similarity_top_k
-        self._top_k_rerank = self._setting.retriever.top_k_rerank
+        self._top_k = self._setting.RETRIEVER.SIMILARITY_TOP_K
+        self._top_k_rerank = self._setting.RETRIEVER.TOP_K_RERANK
 
         self._retriever = {
             "base": VectorIndexRetriever(
@@ -89,7 +89,7 @@ class RAGPipelineEvaluator:
                 node_postprocessors=[
                     SentenceTransformerRerank(
                         top_n=self._top_k_rerank,
-                        model=self._setting.retriever.rerank_llm,
+                        model=self._setting.RETRIEVER.RERANK_LLM,
                     )
                 ],
             ),
@@ -99,7 +99,7 @@ class RAGPipelineEvaluator:
                 node_postprocessors=[
                     SentenceTransformerRerank(
                         top_n=self._top_k_rerank,
-                        model=self._setting.retriever.rerank_llm,
+                        model=self._setting.RETRIEVER.RERANK_LLM,
                     )
                 ],
             ),

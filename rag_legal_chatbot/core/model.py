@@ -10,7 +10,7 @@ load_dotenv()
 
 class LocalRAGModelFactory:
     @staticmethod
-    def set(
+    def set_model(
         model_name: str = "llama3:8b-instruct-q8_0",
         system_prompt: str | None = None,
         host: str = "host.docker.internal",
@@ -18,30 +18,31 @@ class LocalRAGModelFactory:
     ):
         setting = setting or RAGSettings()
         if model_name in ["gpt-4o-mini", "gpt-4o"]:
-            if setting.ollama.api_key is None:
+            if setting.OLLAMA.API_KEY is None:
                 raise ValueError(
                     "API key is required for models gpt-4o-mini, gpt-4o."
                 )
             return OpenAI(
                 model=model_name,
-                temperature=setting.ollama.temperature,
-                api_key=setting.ollama.api_key,
+                system_prompt=system_prompt,
+                temperature=setting.OLLAMA.TEMPERATURE,
+                api_key=setting.OLLAMA.API_KEY,
             )
         else:
             settings_kwargs = {
-                "tfs_z": setting.ollama.tfs_z,
-                "top_k": setting.ollama.top_k,
-                "top_p": setting.ollama.top_p,
-                "repeat_last_n": setting.ollama.repeat_last_n,
-                "repeat_penalty": setting.ollama.repeat_penalty,
+                "tfs_z": setting.OLLAMA.TFS_Z,
+                "top_k": setting.OLLAMA.TOP_K,
+                "top_p": setting.OLLAMA.TOP_P,
+                "repeat_last_n": setting.OLLAMA.REPEAT_LAST_N,
+                "repeat_penalty": setting.OLLAMA.REPEAT_PENALTY,
             }
             return Ollama(
                 model=model_name,
                 system_prompt=system_prompt,
-                base_url=f"http://{host}:{setting.ollama.port}",
-                temperature=setting.ollama.temperature,
-                context_window=setting.ollama.context_window,
-                request_timeout=setting.ollama.request_timeout,
+                base_url=f"http://{host}:{setting.OLLAMA.PORT}",
+                temperature=setting.OLLAMA.TEMPERATURE,
+                context_window=setting.OLLAMA.CONTEXT_WINDOW,
+                request_timeout=setting.OLLAMA.REQUEST_TIMEOUT,
                 additional_kwargs=settings_kwargs,
             )
 
@@ -50,7 +51,7 @@ class LocalRAGModelFactory:
         setting = RAGSettings()
         payload = {"name": model_name}
         return requests.post(
-            f"http://{host}:{setting.ollama.port}/api/pull",
+            f"http://{host}:{setting.OLLAMA.PORT}/api/pull",
             json=payload,
             stream=True,
         )
@@ -59,7 +60,7 @@ class LocalRAGModelFactory:
     def check_model_exist(host: str, model_name: str) -> bool:
         setting = RAGSettings()
         data = requests.get(
-            f"http://{host}:{setting.ollama.port}/api/tags"
+            f"http://{host}:{setting.OLLAMA.PORT}/api/tags"
         ).json()
         if data["models"] is None:
             return False
