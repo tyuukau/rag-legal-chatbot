@@ -293,8 +293,7 @@ class LocalRetrieverFactory:
         """
         vector_index: VectorStoreIndex = LocalVectorStoreFactory(
             setting=self._setting
-            # ).initialize_vector_store_index(nodes)
-        ).get_vector_store_index()
+        ).get_or_create_vector_store_index(nodes)
 
         retriever = self._get_normal_retriever(vector_index)
         # if len(nodes) > self._setting.RETRIEVER.TOP_K_RERANK:
