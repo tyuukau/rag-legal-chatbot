@@ -9,6 +9,7 @@ load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 class OllamaSettings(BaseModel):
     LLM: str = Field(default="gpt-4o-mini", description="LLM model")
+    # "llama3-chatqa:8b-v1.5-q8_0", "llama3-chatqa:8b-v1.5-q6_K"
     API_KEY: Union[str, None] = Field(
         default=os.getenv("API_KEY", None), description="API key"
     )
@@ -27,7 +28,7 @@ class OllamaSettings(BaseModel):
     )
     TEMPERATURE: float = Field(default=0.1, description="Temperature")
     CHAT_TOKEN_LIMIT: int = Field(
-        default=10000, description="Chat memory limit"
+        default=30000, description="Chat memory limit"
     )
 
 
@@ -61,9 +62,9 @@ class IngestionSettings(BaseModel):
     CACHE_FOLDER: str = Field(
         default="data/huggingface", description="Cache folder"
     )
-    CHUNK_SIZE: int = Field(default=256, description="Document chunk size")
+    CHUNK_SIZE: int = Field(default=1024, description="Document chunk size")
     CHUCK_OVERLAP: int = Field(
-        default=32, description="Document chunk overlap"
+        default=200, description="Document chunk overlap"
     )
     CHUNKING_REGEX: str = Field(
         default="[^,.;。？！]+[,.;。？！]?", description="Chunking regex"
@@ -81,6 +82,7 @@ class StorageSettings(BaseModel):
     COLLECTION_NAME: str = Field(
         default="collection", description="Collection name"
     )
+    DOCUMENT_DIR: str = Field(default="./data", description="Data directory")
 
 
 class RAGSettings(BaseModel):

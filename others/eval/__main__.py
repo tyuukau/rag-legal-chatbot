@@ -227,7 +227,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--llm",
         type=str,
-        default="llama3:8b-instruct-q8_0",
+        default="gpt-4o-mini",
         help="Set LLM model",
     )
     parser.add_argument(

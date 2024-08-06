@@ -1,3 +1,4 @@
+from typing import Literal
 from dotenv import load_dotenv
 
 from llama_index.core.schema import (
@@ -10,6 +11,7 @@ from llama_index.core.chat_engine import (
 )
 from llama_index.core.memory import ChatMemoryBuffer
 
+from .vector_store import LocalVectorStoreFactory
 from .prompts import CondensePrompt, ContextPrompt, SystemPrompt
 from .retriever import LocalRetrieverFactory
 
@@ -29,21 +31,27 @@ class LocalChatEngineFactory:
         self.retriever_factory = LocalRetrieverFactory(self._setting)
         self.host = host
 
+    def check_store_exists(self) -> bool:
+        return LocalVectorStoreFactory(
+            setting=self._setting
+        ).check_exist_vector_store_index()
+
     def set_engine(
         self,
         llm: LLM,
         nodes: list[BaseNode],
         language: str = "eng",
+        chat_mode: Literal["QA", "chat"] = "QA",
     ) -> CondensePlusContextChatEngine | SimpleChatEngine:
 
         # Normal chat engine
-        # if len(nodes) == 0:
-        #     return SimpleChatEngine.from_defaults(
-        #         llm=llm,
-        #         memory=ChatMemoryBuffer(
-        #             token_limit=self.setting.OLLAMA.CHAT_TOKEN_LIMIT
-        #         ),
-        #     )
+        if chat_mode == "chat":
+            return SimpleChatEngine.from_defaults(
+                llm=llm,
+                memory=ChatMemoryBuffer(
+                    token_limit=self._setting.OLLAMA.CHAT_TOKEN_LIMIT
+                ),
+            )
 
         # Chat engine with documents
         return CondensePlusContextChatEngine.from_defaults(

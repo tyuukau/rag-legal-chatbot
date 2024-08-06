@@ -102,7 +102,7 @@ class QAGenxerator:
         if os.path.exists(os.path.join(output_dir, "docstore.json")):
             print("Docstore already exist! Skip ingestion.")
 
-        self.ingestion.store_nodes(input_files, embed_nodes=True)
+        self.ingestion.store_nodes(input_files)
         nodes = self.ingestion.get_all_nodes()
         random.shuffle(nodes)
         dataset = _generate_question_context_pairs(

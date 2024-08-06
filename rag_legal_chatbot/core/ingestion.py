@@ -1,4 +1,5 @@
 import re
+import os
 from typing import Any
 import pymupdf
 from dotenv import load_dotenv
@@ -15,9 +16,10 @@ load_dotenv()
 
 class LocalDataIngestion:
     def __init__(self, setting: RAGSettings | None = None) -> None:
-        self._setting = setting or RAGSettings()
         self._node_store = {}
-        self._ingested_file = []
+        self._input_files = []
+        self._ingested_files = []
+        self._setting = setting or RAGSettings()
 
     def _filter_text(self, text):
         # Define the regex pattern.
@@ -30,15 +32,25 @@ class LocalDataIngestion:
 
         return normalized_text
 
+    def process_documents(self):
+        document_dir = os.path.abspath(self._setting.STORAGE.DOCUMENT_DIR)
+
+        input_files = []
+
+        for root, _, files in os.walk(document_dir):
+            for file in files:
+                file_path = os.path.join(root, file)
+                input_files.append(file_path)
+
+        self._input_files = input_files
+
     def store_nodes(
         self,
-        input_files: list[str],
-        embed_nodes: bool = True,
         embed_model: Any | None = None,
     ) -> None:
-        self._ingested_file = []
+        self._ingested_files = []
 
-        if len(input_files) == 0:
+        if len(self._input_files) == 0:
             return
 
         splitter = SentenceSplitter.from_defaults(
@@ -48,12 +60,11 @@ class LocalDataIngestion:
             secondary_chunking_regex=self._setting.INGESTION.CHUNKING_REGEX,
         )
 
-        if embed_nodes:
-            Settings.embed_model = embed_model or Settings.embed_model
+        Settings.embed_model = embed_model or Settings.embed_model
 
-        for input_file in tqdm(input_files, desc="Ingesting data"):
+        for input_file in tqdm(self._input_files, desc="Ingesting data"):
             file_name = input_file.strip().split("/")[-1]
-            self._ingested_file.append(file_name)
+            self._ingested_files.append(file_name)
 
             if file_name in self._node_store:
                 continue
@@ -75,21 +86,17 @@ class LocalDataIngestion:
 
             nodes = splitter([document], show_progress=True)
 
-            if embed_nodes:
-                nodes = Settings.embed_model(nodes, show_progress=True)
+            nodes = Settings.embed_model(nodes, show_progress=True)
 
             self._node_store[file_name] = nodes
 
     def reset(self):
         self._node_store = {}
-        self._ingested_file = []
-
-    def check_nodes_exist(self):
-        return len(self._node_store.values()) > 0
+        self._ingested_files = []
 
     def get_ingested_nodes(self) -> list[BaseNode]:
         return_nodes = []
-        for file_name in self._ingested_file:
+        for file_name in self._ingested_files:
             return_nodes.extend(self._node_store[file_name])
         return return_nodes
 

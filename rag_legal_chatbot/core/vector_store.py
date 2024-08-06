@@ -17,26 +17,40 @@ class LocalVectorStoreFactory:
         self._persist_dir = self._setting.STORAGE.PERSIST_DIR
         self._collection_name = self._setting.STORAGE.COLLECTION_NAME
 
-    def initialize_vector_store_index(self, nodes) -> VectorStoreIndex:
-        if len(nodes) == 0:
-            return None
+    def check_exist_vector_store_index(self) -> bool:
         db = chromadb.PersistentClient(path=self._persist_dir)
-        collection = db.get_or_create_collection(self._collection_name)
-        vector_store = ChromaVectorStore(chroma_collection=collection)
-        storage_context = StorageContext.from_defaults(
-            vector_store=vector_store
-        )
-        index = VectorStoreIndex(nodes=nodes, storage_context=storage_context)
-        return index
+        col_exists = True
+        try:
+            _ = db.get_collection(self._collection_name)
+        except Exception:
+            col_exists = False
 
-    def get_vector_store_index(self) -> VectorStoreIndex:
+        return col_exists
+
+    def get_or_create_vector_store_index(self, nodes) -> VectorStoreIndex:
         db = chromadb.PersistentClient(path=self._persist_dir)
-        collection = db.get_collection(self._collection_name)
-        vector_store = ChromaVectorStore(chroma_collection=collection)
-        storage_context = StorageContext.from_defaults(
-            vector_store=vector_store
-        )
-        index = VectorStoreIndex.from_vector_store(
-            vector_store, storage_context=storage_context
-        )
+        col_exists = True
+        try:
+            collection = db.get_collection(self._collection_name)
+        except Exception:
+            col_exists = False
+
+        if col_exists:
+            vector_store = ChromaVectorStore(chroma_collection=collection)
+            storage_context = StorageContext.from_defaults(
+                vector_store=vector_store
+            )
+            index = VectorStoreIndex.from_vector_store(
+                vector_store, storage_context=storage_context
+            )
+        else:
+            collection = db.create_collection(self._collection_name)
+            vector_store = ChromaVectorStore(chroma_collection=collection)
+            storage_context = StorageContext.from_defaults(
+                vector_store=vector_store
+            )
+            index = VectorStoreIndex(
+                nodes=nodes, storage_context=storage_context
+            )
+
         return index
