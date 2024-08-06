@@ -124,3 +124,9 @@ python -m rag_legal_chatbot --mode test
 ```
 
 The form of the input JSON file follows that of the provided JSON file `data/test_questions.json`.
+
+## Demo
+
+https://github.com/user-attachments/assets/44346b42-e11d-452c-9765-0633a9031b20
+
+
