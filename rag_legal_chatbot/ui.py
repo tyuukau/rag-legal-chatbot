@@ -127,6 +127,7 @@ class LocalChatbotApp:
         gr.Info(f"Change chat mode to {chat_mode}")
 
     def _get_sources(self):
+        # print("Getting sources:", self._sources)
         return self._sources
 
     def _get_respone(
@@ -304,16 +305,14 @@ class LocalChatbotApp:
 
                         @gr.render(inputs=sources_)
                         def render_sources(sources):
-                            boxes = []
+                            # print("Rendering sources:", sources)
                             a = 1
                             for source in sources:
-                                box = gr.Textbox(
+                                gr.Textbox(
                                     value=source,
-                                    key=a,
                                     label=f"Source {a}",
                                     max_lines=5,
                                 )
-                                boxes.append(box)
                                 a += 1
 
             with gr.Tab("Output"):
