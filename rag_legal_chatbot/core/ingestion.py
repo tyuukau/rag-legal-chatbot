@@ -90,10 +90,6 @@ class LocalDataIngestion:
 
             self._node_store[file_name] = nodes
 
-    def reset(self):
-        self._node_store = {}
-        self._ingested_files = []
-
     def get_ingested_nodes(self) -> list[BaseNode]:
         return_nodes = []
         for file_name in self._ingested_files:

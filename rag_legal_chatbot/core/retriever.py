@@ -9,18 +9,21 @@ from llama_index.core.schema import (
     NodeWithScore,
     QueryBundle,
 )
-from llama_index.core.selectors import LLMSingleSelector
-from llama_index.core.tools import RetrieverTool
+
+# from llama_index.core.selectors import LLMSingleSelector
+# from llama_index.core.tools import RetrieverTool
 from llama_index.core.retrievers import (
     BaseRetriever,
     QueryFusionRetriever,
-    RouterRetriever,
     VectorIndexRetriever,
+    # RouterRetriever,
 )
-from llama_index.retrievers.bm25 import BM25Retriever
+
+# from llama_index.retrievers.bm25 import BM25Retriever
 
 from .vector_store import LocalVectorStoreFactory
-from .prompts import QueryGenPrompt, SingleSelectPrompt
+
+# from .prompts import QueryGenPrompt, SingleSelectPrompt
 
 from ..settings import RAGSettings
 
@@ -97,19 +100,7 @@ class TwoStageRetriever(QueryFusionRetriever):
             list[NodeWithScore]: List of retrieved nodes with their corresponding scores.
 
         """
-        queries: list[QueryBundle] = [query_bundle]
-
-        if self.num_queries > 1:
-            queries.extend(self._get_queries(query_bundle.query_str))
-
-        if self.use_async:
-            results = self._run_nested_async_queries(queries)
-        else:
-            results = self._run_sync_queries(queries)
-
-        results = self._simple_fusion(results)
-
-        return self.rerank_model.postprocess_nodes(results, query_bundle)
+        raise NotImplementedError
 
     async def _aretrieve(
         self, query_bundle: QueryBundle
@@ -124,13 +115,7 @@ class TwoStageRetriever(QueryFusionRetriever):
             list[NodeWithScore]: List of retrieved nodes with their corresponding scores.
 
         """
-        queries: list[QueryBundle] = [query_bundle]
-        if self.num_queries > 1:
-            queries.extend(self._get_queries(query_bundle.query_str))
-
-        results = await self._run_async_queries(queries)
-        results = self._simple_fusion(results)
-        return self.rerank_model.postprocess_nodes(results, query_bundle)
+        raise NotImplementedError
 
 
 class LocalRetrieverFactory:
@@ -195,45 +180,7 @@ class LocalRetrieverFactory:
         Returns:
             QueryFusionRetriever or TwoStageRetriever: The hybrid retriever.
         """
-        # VECTOR INDEX RETRIEVER
-        vector_retriever = VectorIndexRetriever(
-            index=vector_index,
-            similarity_top_k=self._setting.RETRIEVER.SIMILARITY_TOP_K,
-            embed_model=Settings.embed_model,
-            verbose=True,
-        )
-
-        bm25_retriever = BM25Retriever.from_defaults(
-            index=vector_index,
-            similarity_top_k=self._setting.RETRIEVER.SIMILARITY_TOP_K,
-            verbose=True,
-        )
-
-        # FUSION RETRIEVER
-        if gen_query:
-            hybrid_retriever = QueryFusionRetriever(
-                retrievers=[bm25_retriever, vector_retriever],
-                retriever_weights=self._setting.RETRIEVER.RETRIEVER_WEIGHTS,
-                llm=llm,
-                query_gen_prompt=QueryGenPrompt()(language),
-                similarity_top_k=self._setting.RETRIEVER.TOP_K_RERANK,
-                num_queries=self._setting.RETRIEVER.NUM_QUERIES,
-                mode=self._setting.RETRIEVER.FUSION_MODE,
-                verbose=True,
-            )
-        else:
-            hybrid_retriever = TwoStageRetriever(
-                retrievers=[bm25_retriever, vector_retriever],
-                retriever_weights=self._setting.RETRIEVER.RETRIEVER_WEIGHTS,
-                llm=llm,
-                query_gen_prompt=None,
-                similarity_top_k=self._setting.RETRIEVER.SIMILARITY_TOP_K,
-                num_queries=1,
-                mode=self._setting.RETRIEVER.FUSION_MODE,
-                verbose=True,
-            )
-
-        return hybrid_retriever
+        raise NotImplementedError
 
     def _get_router_retriever(
         self,
@@ -251,29 +198,7 @@ class LocalRetrieverFactory:
         Returns:
             RouterRetriever: The router retriever.
         """
-        fusion_tool = RetrieverTool.from_defaults(
-            retriever=self._get_hybrid_retriever(
-                vector_index, llm, gen_query=True
-            ),
-            description="Use this tool when the user's query is ambiguous or unclear.",
-            name="Fusion Retriever with BM25 and Vector Retriever and LLM Query Generation.",
-        )
-        two_stage_tool = RetrieverTool.from_defaults(
-            retriever=self._get_hybrid_retriever(
-                vector_index, llm, gen_query=False
-            ),
-            description="Use this tool when the user's query is clear and unambiguous.",
-            name="Two Stage Retriever with BM25 and Vector Retriever and LLM Rerank.",
-        )
-
-        return RouterRetriever.from_defaults(
-            selector=LLMSingleSelector.from_defaults(
-                llm=llm,
-                prompt_template_str=SingleSelectPrompt()(language=language),
-            ),
-            retriever_tools=[fusion_tool, two_stage_tool],
-            llm=llm,
-        )
+        raise NotImplementedError
 
     def get_retrievers(
         self,
@@ -296,9 +221,5 @@ class LocalRetrieverFactory:
         ).get_or_create_vector_store_index(nodes)
 
         retriever = self._get_normal_retriever(vector_index)
-        # if len(nodes) > self._setting.RETRIEVER.TOP_K_RERANK:
-        #     retriever = self._get_router_retriever(
-        #         vector_index, llm, language
-        #     )
 
         return retriever
