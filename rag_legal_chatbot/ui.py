@@ -111,18 +111,12 @@ class LocalChatbotApp:
         self.pipeline.set_chat_engine(language=language)
         gr.Info(f"Change language to {language}")
 
-    def _change_chat_mode(self, chat_mode: str):
-        self.pipeline.set_chat_mode(chat_mode)
-        self.pipeline.set_chat_engine()
-        gr.Info(f"Change chat mode to {chat_mode}")
-
     def _get_sources(self):
         # print("Getting sources:", self._sources)
         return self._sources
 
     def _get_respone(
         self,
-        chat_mode: str,
         message: str,
         chatbot: list[list[str, str]],
         progress: gr.Progress = gr.Progress(track_tqdm=True),
@@ -134,7 +128,7 @@ class LocalChatbotApp:
         else:
             console = sys.stdout
             sys.stdout = self.logger
-            response = self.pipeline.query(chat_mode, message, chatbot)
+            response = self.pipeline.query(message, chatbot)
             for m in self._llm_response.yield_stream_response(
                 message, chatbot, response
             ):
@@ -147,7 +141,6 @@ class LocalChatbotApp:
 
     async def _aget_respone(
         self,
-        chat_mode: str,
         message: str,
         chatbot: list[list[str, str]],
         progress: gr.Progress = gr.Progress(track_tqdm=True),
@@ -159,7 +152,7 @@ class LocalChatbotApp:
         else:
             console = sys.stdout
             sys.stdout = self.logger
-            response = await self.pipeline.aquery(chat_mode, message, chatbot)
+            response = await self.pipeline.aquery(message, chatbot)
             for m in self._llm_response.yield_stream_response(
                 message, chatbot, response
             ):
@@ -238,12 +231,6 @@ class LocalChatbotApp:
                             value="Ready!",
                             interactive=False,
                         )
-                        chat_mode = gr.Radio(
-                            label="Chat Mode",
-                            choices=["chat", "QA"],
-                            value=self.pipeline._chat_mode,
-                            interactive=True,
-                        )
                         language = gr.Radio(
                             label="Language",
                             choices=["eng", "cs", "vi"],
@@ -319,12 +306,11 @@ class LocalChatbotApp:
 
             message.submit(
                 self._get_respone,
-                inputs=[chat_mode, message, chatbot],
+                inputs=[message, chatbot],
                 outputs=[message, chatbot, status],
             ).then(self._get_sources, inputs=None, outputs=[sources_])
 
             language.change(self._change_language, inputs=[language])
-            chat_mode.change(self._change_chat_mode, inputs=[chat_mode])
 
             clear_btn.click(
                 self._clear_chat, outputs=[message, chatbot, status]

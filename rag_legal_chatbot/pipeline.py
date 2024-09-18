@@ -15,7 +15,6 @@ class LocalRAGPipeline:
         self._host = host
 
         self._model_name = "gpt-4o-mini"
-        self._chat_mode = "QA"
 
         self._engine = LocalChatEngineFactory(host=host)
         self._default_model = LocalRAGModelFactory.set_model(
@@ -25,13 +24,6 @@ class LocalRAGPipeline:
         self._ingestion = LocalDataIngestion()
         Settings.llm = LocalRAGModelFactory.set_model(host=host)
         Settings.embed_model = LocalEmbeddingFactory.set_embedding(host=host)
-
-    ##########
-    # BASICS #
-    ##########
-
-    def set_chat_mode(self, chat_mode: str) -> None:
-        self._chat_mode = chat_mode
 
     #############
     # INGESTION #
@@ -73,7 +65,6 @@ class LocalRAGPipeline:
             llm=self._default_model,
             nodes=self._ingestion.get_ingested_nodes(),
             language=language,
-            chat_mode=self._chat_mode,
         )
 
     def set_chat_engine(self, language: str = "en"):
@@ -104,21 +95,13 @@ class LocalRAGPipeline:
     #########
 
     def query(
-        self, chat_mode: str, message: str, chatbot: list[list[str]]
+        self, message: str, chatbot: list[list[str]]
     ) -> StreamingAgentChatResponse:
-        if chat_mode == "chat":
-            history = self.get_history(chatbot)
-            return self._query_engine.stream_chat(message, history)
-        else:
-            self._query_engine.reset()
-            return self._query_engine.stream_chat(message)
+        self._query_engine.reset()
+        return self._query_engine.stream_chat(message)
 
     async def aquery(
-        self, mode: str, message: str, chatbot: list[list[str]]
+        self, message: str, chatbot: list[list[str]]
     ) -> StreamingAgentChatResponse:
-        if mode == "chat":
-            history = self.get_history(chatbot)
-            return await self._query_engine.astream_chat(message, history)
-        else:
-            self._query_engine.reset()
-            return await self._query_engine.astream_chat(message)
+        self._query_engine.reset()
+        return await self._query_engine.astream_chat(message)

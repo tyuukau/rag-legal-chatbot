@@ -1,4 +1,3 @@
-from typing import Literal
 from dotenv import load_dotenv
 
 from llama_index.core.schema import (
@@ -41,17 +40,7 @@ class LocalChatEngineFactory:
         llm: LLM,
         nodes: list[BaseNode],
         language: str = "eng",
-        chat_mode: Literal["QA", "chat"] = "QA",
     ) -> CondensePlusContextChatEngine | SimpleChatEngine:
-
-        # Normal chat engine
-        if chat_mode == "chat":
-            return SimpleChatEngine.from_defaults(
-                llm=llm,
-                memory=ChatMemoryBuffer(
-                    token_limit=self._setting.OLLAMA.CHAT_TOKEN_LIMIT
-                ),
-            )
 
         # Chat engine with documents
         return CondensePlusContextChatEngine.from_defaults(
