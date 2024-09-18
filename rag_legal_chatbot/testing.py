@@ -28,7 +28,7 @@ def mass_test(input_json: str, output_json: str) -> None:
     print("Initializing the pipeline...")
     # Initialize the pipeline
     pipeline = LocalRAGPipeline()
-    pipeline.set_chat_engine()
+    pipeline.set_chat_engine(language="cz")
 
     print(f"Reading input data from {input_json}...")
     # Read the JSON input

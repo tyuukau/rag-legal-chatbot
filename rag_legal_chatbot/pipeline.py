@@ -13,7 +13,7 @@ from .core import (
 class LocalRAGPipeline:
     def __init__(self, host: str = "host.docker.internal") -> None:
         self._host = host
-        self._language = "eng"
+
         self._model_name = "gpt-4o-mini"
         self._chat_mode = "QA"
 
@@ -29,9 +29,6 @@ class LocalRAGPipeline:
     ##########
     # BASICS #
     ##########
-
-    def set_language(self, language: str) -> None:
-        self._language = language
 
     def set_chat_mode(self, chat_mode: str) -> None:
         self._chat_mode = chat_mode
@@ -53,10 +50,10 @@ class LocalRAGPipeline:
     # LLM MODEL #
     #############
 
-    def set_model(self):
+    def set_model(self, language: str = "en"):
         Settings.llm = LocalRAGModelFactory.set_model(
             model_name=self._model_name,
-            language=self._language,
+            language=language,
             host=self._host,
         )
         self._default_model = Settings.llm
@@ -71,22 +68,17 @@ class LocalRAGPipeline:
     # ENGINGE #
     ###########
 
-    def set_engine(self):
+    def set_engine(self, language: str = "en"):
         self._query_engine = self._engine.set_engine(
             llm=self._default_model,
             nodes=self._ingestion.get_ingested_nodes(),
-            language=self._language,
+            language=language,
             chat_mode=self._chat_mode,
         )
 
-    # def reset_engine(self):
-    #     self._query_engine = self._engine.set_engine(
-    #         llm=self._default_model, nodes=[], language=self._language
-    #     )
-
-    def set_chat_engine(self):
-        self.set_model()
-        self.set_engine()
+    def set_chat_engine(self, language: str = "en"):
+        self.set_model(language)
+        self.set_engine(language)
 
     ################
     # CONVERSATION #

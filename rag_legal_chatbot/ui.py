@@ -108,8 +108,7 @@ class LocalChatbotApp:
         self._sources: list[str] = []
 
     def _change_language(self, language: str):
-        self.pipeline.set_language(language)
-        self.pipeline.set_chat_engine()
+        self.pipeline.set_chat_engine(language=language)
         gr.Info(f"Change language to {language}")
 
     def _change_chat_mode(self, chat_mode: str):
