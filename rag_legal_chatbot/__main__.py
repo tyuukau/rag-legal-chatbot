@@ -5,7 +5,8 @@ from dotenv import load_dotenv
 from .ui import LocalChatbotApp
 from .pipeline import LocalRAGPipeline
 from .logger import Logger
-from .ollama import run_ollama_server, is_port_open
+
+# from .ollama import run_ollama_server, is_port_open
 
 from .testing import mass_test
 
@@ -63,10 +64,10 @@ def main():
             print(f"Error during mass test: {e}")
     else:
         # OLLAMA SERVER
-        if args.host != "host.docker.internal":
-            port_number = 11434
-            if not is_port_open(port_number):
-                run_ollama_server()
+        # if args.host != "host.docker.internal":
+        #     port_number = 11434
+        #     if not is_port_open(port_number):
+        #         run_ollama_server()
 
         # LOGGER
         llama_index.core.set_global_handler("simple")

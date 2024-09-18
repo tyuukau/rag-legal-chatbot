@@ -1,4 +1,4 @@
-from llama_index.llms.ollama import Ollama
+# from llama_index.llms.ollama import Ollama
 from llama_index.llms.openai import OpenAI
 from dotenv import load_dotenv
 import requests
@@ -29,22 +29,23 @@ class LocalRAGModelFactory:
                 api_key=setting.OLLAMA.API_KEY,
             )
         else:
-            settings_kwargs = {
-                "tfs_z": setting.OLLAMA.TFS_Z,
-                "top_k": setting.OLLAMA.TOP_K,
-                "top_p": setting.OLLAMA.TOP_P,
-                "repeat_last_n": setting.OLLAMA.REPEAT_LAST_N,
-                "repeat_penalty": setting.OLLAMA.REPEAT_PENALTY,
-            }
-            return Ollama(
-                model=model_name,
-                system_prompt=system_prompt,
-                base_url=f"http://{host}:{setting.OLLAMA.PORT}",
-                temperature=setting.OLLAMA.TEMPERATURE,
-                context_window=setting.OLLAMA.CONTEXT_WINDOW,
-                request_timeout=setting.OLLAMA.REQUEST_TIMEOUT,
-                additional_kwargs=settings_kwargs,
-            )
+            raise ValueError("Must use OpenAI models.")
+            # settings_kwargs = {
+            #     "tfs_z": setting.OLLAMA.TFS_Z,
+            #     "top_k": setting.OLLAMA.TOP_K,
+            #     "top_p": setting.OLLAMA.TOP_P,
+            #     "repeat_last_n": setting.OLLAMA.REPEAT_LAST_N,
+            #     "repeat_penalty": setting.OLLAMA.REPEAT_PENALTY,
+            # }
+            # return Ollama(
+            #     model=model_name,
+            #     system_prompt=system_prompt,
+            #     base_url=f"http://{host}:{setting.OLLAMA.PORT}",
+            #     temperature=setting.OLLAMA.TEMPERATURE,
+            #     context_window=setting.OLLAMA.CONTEXT_WINDOW,
+            #     request_timeout=setting.OLLAMA.REQUEST_TIMEOUT,
+            #     additional_kwargs=settings_kwargs,
+            # )
 
     @staticmethod
     def pull(host: str, model_name: str):
