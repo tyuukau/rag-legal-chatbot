@@ -17,12 +17,10 @@ class LocalRAGPipeline:
         self._model_name = "gpt-4o-mini"
 
         self._engine = LocalChatEngineFactory(host=host)
-        self._default_model = LocalRAGModelFactory.set_model(
-            self._model_name, host=host
-        )
+        self._default_model = LocalRAGModelFactory.set_model(self._model_name)
         self._query_engine = None
         self._ingestion = LocalDataIngestion()
-        Settings.llm = LocalRAGModelFactory.set_model(host=host)
+        Settings.llm = LocalRAGModelFactory.set_model()
         Settings.embed_model = LocalEmbeddingFactory.set_embedding(host=host)
 
     #############
@@ -44,9 +42,7 @@ class LocalRAGPipeline:
 
     def set_model(self, language: str = "en"):
         Settings.llm = LocalRAGModelFactory.set_model(
-            model_name=self._model_name,
-            language=language,
-            host=self._host,
+            model_name=self._model_name, language=language
         )
         self._default_model = Settings.llm
 

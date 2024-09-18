@@ -14,12 +14,13 @@ load_dotenv()
 class LocalRAGModelFactory:
     @staticmethod
     def set_model(
-        model_name: str = "llama3:8b-instruct-q8_0",
+        model_name: str = "gpt-4o-mini",
         language: str = "en",
         # host: str = "host.docker.internal",
         setting: RAGSettings | None = None,
     ):
         setting = setting or RAGSettings()
+        system_prompt: str = SystemPrompt()(language=language)
         if model_name in ["gpt-4o-mini", "gpt-4o"]:
             if setting.OLLAMA.API_KEY is None:
                 raise ValueError(
@@ -27,9 +28,11 @@ class LocalRAGModelFactory:
                 )
             return OpenAI(
                 model=model_name,
-                system_prompt=SystemPrompt()(language=language),
+                system_prompt=system_prompt,
                 temperature=setting.OLLAMA.TEMPERATURE,
                 api_key=setting.OLLAMA.API_KEY,
+                logprobs=False,
+                default_headers=None,
             )
         else:
             raise ValueError("Must use OpenAI models.")
