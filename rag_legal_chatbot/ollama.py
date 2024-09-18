@@ -37,7 +37,9 @@ def run_ollama_server():
     new_loop = asyncio.new_event_loop()
 
     # Start ollama serve in a separate thread so the cell won't block execution
-    thread = threading.Thread(target=run_async_in_thread, args=(new_loop, start_ollama_serve()))
+    thread = threading.Thread(
+        target=run_async_in_thread, args=(new_loop, start_ollama_serve())
+    )
     thread.start()
 
 

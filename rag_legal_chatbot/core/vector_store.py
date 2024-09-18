@@ -19,13 +19,11 @@ class LocalVectorStoreFactory:
 
     def check_exist_vector_store_index(self) -> bool:
         db = chromadb.PersistentClient(path=self._persist_dir)
-        col_exists = True
         try:
             _ = db.get_collection(self._collection_name)
         except Exception:
-            col_exists = False
-
-        return col_exists
+            return False
+        return True
 
     def get_or_create_vector_store_index(self, nodes) -> VectorStoreIndex:
         db = chromadb.PersistentClient(path=self._persist_dir)

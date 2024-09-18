@@ -55,12 +55,6 @@ class LocalRAGPipeline:
     # LLM MODEL #
     #############
 
-    def set_model_name(self, model_name: str):
-        self._model_name = model_name
-
-    def get_model_name(self):
-        return self._model_name
-
     def set_model(self):
         Settings.llm = LocalRAGModelFactory.set_model(
             model_name=self._model_name,
@@ -102,9 +96,6 @@ class LocalRAGPipeline:
 
     def clear_conversation(self):
         self._query_engine.reset()
-
-    def reset_conversation(self):
-        self.reset_engine()
 
     def get_history(self, chatbot: list[list[str]]):
         history = []

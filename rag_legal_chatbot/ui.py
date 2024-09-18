@@ -43,18 +43,13 @@ class _DefaultElement:
     DEFAULT_HISTORY: ClassVar[list] = []
 
     HELLO_MESSAGE: str = "Hi 👋, how can I help you today?"
-    SET_MODEL_MESSAGE: str = "You need to choose LLM model 🤖 first!"
     EMPTY_MESSAGE: str = "You need to enter your message!"
     DEFAULT_STATUS: str = "Ready!"
-    CONFIRM_PULL_MODEL_STATUS: str = "Confirm Pull Model!"
-    PULL_MODEL_SCUCCESS_STATUS: str = "Pulling model 🤖 completed!"
-    PULL_MODEL_FAIL_STATUS: str = "Pulling model 🤖 failed!"
-    MODEL_NOT_EXIST_STATUS: str = "Model doesn't exist!"
     ANSWERING_STATUS: str = "Answering!"
     COMPLETED_STATUS: str = "Completed!"
 
 
-class _LLMResponse:
+class LLMResponse:
     def __init__(self) -> None:
         # Pass
         pass
@@ -70,9 +65,6 @@ class _LLMResponse:
 
     def yield_welcome_string(self):
         yield from self._yield_string(_DefaultElement.HELLO_MESSAGE)
-
-    def yield_set_model_string(self):
-        yield from self._yield_string(_DefaultElement.SET_MODEL_MESSAGE)
 
     def yield_empty_message_string(self):
         yield from self._yield_string(_DefaultElement.EMPTY_MESSAGE)
@@ -112,8 +104,7 @@ class LocalChatbotApp:
         self._avatar_images = [
             os.path.join(os.getcwd(), image) for image in avatar_images
         ]
-        self._variant = "panel"
-        self._llm_response = _LLMResponse()
+        self._llm_response = LLMResponse()
         self._sources: list[str] = []
 
     def _change_language(self, language: str):
@@ -137,11 +128,7 @@ class LocalChatbotApp:
         chatbot: list[list[str, str]],
         progress: gr.Progress = gr.Progress(track_tqdm=True),
     ):
-        if self.pipeline.get_model_name() in [None, ""]:
-            for m in self._llm_response.yield_set_model_string():
-                yield m
-            self._sources = []
-        elif message in [None, ""]:
+        if message in [None, ""]:
             for m in self._llm_response.yield_empty_message_string():
                 yield m
             self._sources = []
@@ -166,11 +153,7 @@ class LocalChatbotApp:
         chatbot: list[list[str, str]],
         progress: gr.Progress = gr.Progress(track_tqdm=True),
     ):
-        if self.pipeline.get_model_name() in [None, ""]:
-            for m in self._llm_response.yield_set_model_string():
-                yield m
-            self._sources = []
-        elif message in [None, ""]:
+        if message in [None, ""]:
             for m in self._llm_response.yield_empty_message_string():
                 yield m
             self._sources = []
@@ -244,10 +227,10 @@ class LocalChatbotApp:
             with gr.Tab("Interface"):
                 sidebar_state = gr.State(True)
 
-                with gr.Row(variant=self._variant, equal_height=False):
+                with gr.Row(variant="panel", equal_height=False):
 
                     with gr.Column(
-                        variant=self._variant,
+                        variant="panel",
                         scale=10,
                         visible=sidebar_state.value,
                     ) as setting:
@@ -269,7 +252,7 @@ class LocalChatbotApp:
                             interactive=True,
                         )
 
-                    with gr.Column(scale=30, variant=self._variant):
+                    with gr.Column(scale=30, variant="panel"):
                         chatbot = gr.Chatbot(
                             layout="bubble",
                             value=[],
@@ -280,7 +263,7 @@ class LocalChatbotApp:
                             avatar_images=self._avatar_images,
                         )
 
-                        with gr.Row(variant=self._variant):
+                        with gr.Row(variant="panel"):
                             message = gr.Textbox(
                                 value=_DefaultElement.DEFAULT_MESSAGE,
                                 placeholder="Enter you message:",
@@ -288,7 +271,7 @@ class LocalChatbotApp:
                                 scale=6,
                                 lines=1,
                             )
-                        with gr.Row(variant=self._variant):
+                        with gr.Row(variant="panel"):
                             ui_btn = gr.Button(
                                 value=(
                                     "Hide Setting"
@@ -300,7 +283,7 @@ class LocalChatbotApp:
                             undo_btn = gr.Button(value="Undo", min_width=20)
                             clear_btn = gr.Button(value="Clear", min_width=20)
 
-                    with gr.Column(scale=10, variant=self._variant):
+                    with gr.Column(scale=10, variant="panel"):
                         sources_ = gr.State(self._sources)
 
                         @gr.render(inputs=sources_)
@@ -316,7 +299,7 @@ class LocalChatbotApp:
                                 a += 1
 
             with gr.Tab("Output"):
-                with gr.Row(variant=self._variant):
+                with gr.Row(variant="panel"):
                     log = gr.Code(
                         label="",
                         language="markdown",

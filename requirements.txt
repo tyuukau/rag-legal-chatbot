@@ -6,6 +6,8 @@ llama-index-embeddings-huggingface
 llama-index-llms-openai
 llama-index-llms-ollama
 llama-index-vector-stores-chroma
+llama-index-graph-stores-neo4j 
+graspologic
 chromadb
 llama-index-readers-file
 llama-index
