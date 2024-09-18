@@ -9,8 +9,6 @@ from .core import (
     LocalEmbeddingFactory,
 )
 
-from .core.prompts import SystemPrompt
-
 
 class LocalRAGPipeline:
     def __init__(self, host: str = "host.docker.internal") -> None:
@@ -58,16 +56,16 @@ class LocalRAGPipeline:
     def set_model(self):
         Settings.llm = LocalRAGModelFactory.set_model(
             model_name=self._model_name,
-            system_prompt=SystemPrompt()(language=self._language),
+            language=self._language,
             host=self._host,
         )
         self._default_model = Settings.llm
 
-    def pull_model(self, model_name: str):
-        return LocalRAGModelFactory.pull(self._host, model_name)
+    # def pull_model(self, model_name: str):
+    #     return LocalRAGModelFactory.pull(self._host, model_name)
 
-    def check_exist(self, model_name: str) -> bool:
-        return LocalRAGModelFactory.check_model_exist(self._host, model_name)
+    # def check_exist(self, model_name: str) -> bool:
+    #     return LocalRAGModelFactory.check_model_exist(self._host, model_name)
 
     ###########
     # ENGINGE #
@@ -81,10 +79,10 @@ class LocalRAGPipeline:
             chat_mode=self._chat_mode,
         )
 
-    def reset_engine(self):
-        self._query_engine = self._engine.set_engine(
-            llm=self._default_model, nodes=[], language=self._language
-        )
+    # def reset_engine(self):
+    #     self._query_engine = self._engine.set_engine(
+    #         llm=self._default_model, nodes=[], language=self._language
+    #     )
 
     def set_chat_engine(self):
         self.set_model()

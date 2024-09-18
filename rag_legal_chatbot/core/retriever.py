@@ -127,7 +127,7 @@ class LocalRetrieverFactory:
         _host (str): The host address.
 
     Methods:
-        __init__: Initializes the _LocalRetriever object.
+        __init__: Initializes the LocalRetrieverFactory object.
         _get_normal_retriever: Returns a normal retriever.
         _get_hybrid_retriever: Returns a hybrid retriever.
         _get_router_retriever: Returns a router retriever.
